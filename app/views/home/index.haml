@@ -1,0 +1,40 @@
+:css
+  .dotted { font-size: 12px; text-decoration: none;font-family: "Trebuchet MS"; border-bottom: 1px dotted #38e; }
+
+%p
+  Welcome, 
+  %b=current_user.email
+  =link_to "Sign out", destroy_session_path(current_user), method: :delete
+
+%table
+  %th #
+  %th Type
+  %th File
+  %th Line
+  %th Agent
+  %th Noticed On
+  %th Status
+  -for r in @reports
+    %tr
+      %td=r.id
+      %td=r.etype
+      %td=link_to r.efile, r.efile, class:'dotted'
+      %td=r.eline
+      %td=r.agent
+      %td=r.created_at.to_time
+      %td
+        -if r.status != 1
+          %b not fixed
+
+
+
+%p=will_paginate @reports
+
+%p
+  %a.dotted{onclick:''} code for embeding(put it right after < HEAD > tag)
+%p
+  %textarea
+    r u ready?
+
+%b.small
+  YSoSlow?

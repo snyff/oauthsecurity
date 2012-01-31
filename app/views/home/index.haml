@@ -29,12 +29,13 @@
 
 
 %p=will_paginate @reports
+-domain = 'http://lh:3000/'
+-domain = 'http://clientsit.heroku.com/'
 
+-uid = current_user.id
 %p
-  %a.dotted{onclick:''} code for embeding(put it right after < HEAD > tag)
-%p
-  %textarea
-    =preserve do
+  %textarea{cols:80,rows:20}
+    :preserve
       //YSoSlow/ClientSit
       //put this code right after <head>
 
@@ -53,7 +54,7 @@
             w._clientsit.log.push(a);
             w.localStorage._clientsitlog = JSON.stringify(w._clientsit.log);
             var i = document.createElement('script');
-            i.src = report_to+'report?report[user_id]=1'+
+            i.src = report_to+'report?report[user_id]=#{uid}'+
             '&report[agent]='+encodeURI(w.navigator.userAgent)+
             '&report[etype]='+encodeURI(a)+
             '&report[efile]='+encodeURI(b)+
@@ -69,8 +70,10 @@
             }
           }
         }
-      })(window, 'http://lh:3000/');
+      })(window, '#{domain}');
 
+%p
+  %a.dotted{onclick:''} code for embeding(put it right after < HEAD > tag)
       
 %b.small
   YSoSlow?

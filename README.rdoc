@@ -3,7 +3,7 @@ Now you can track all client-side errors, since nobody can test every feature in
 
 ClientSit provides simple, vanilla piece of JS code that really "cares" about your client-side - it sends all errors to ClientSit server so you can fix it, but the most important part - you get know about that bug ASAP!
 
-Start using right away! http://clientsit.heroku.com/
+Start using right away! http://clientsit.heroku.com
 
 == FEATURES
 1. You don't get repeated bugs - We store sent bugs in localStorage so user won't send you the same bug a million times

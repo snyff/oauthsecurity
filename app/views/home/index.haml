@@ -6,27 +6,28 @@
   %b=current_user.email
   =link_to "Sign out", destroy_session_path(current_user), method: :delete
 
-%table
-  %th #
-  %th Type
-  %th File
-  %th Line
-  %th Agent
-  %th Noticed On
-  %th Status
-  -for r in @reports
-    %tr
-      %td=r.id
-      %td=r.etype
-      %td=link_to r.efile, r.efile, class:'dotted'
-      %td=r.eline
-      %td=r.agent
-      %td=r.created_at.to_time
-      %td
-        -if r.status != 1
-          %b not fixed
-
-
+-if @reports.empty?
+  %p No errors yet.
+-else
+  %table
+    %th #
+    %th Type
+    %th File
+    %th Line
+    %th Agent
+    %th Noticed On
+    %th Status
+    -for r in @reports
+      %tr
+        %td=r.id
+        %td=r.etype
+        %td=link_to r.efile, r.efile, class:'dotted'
+        %td=r.eline
+        %td=r.agent
+        %td=r.created_at.to_time
+        %td
+          -if r.status != 1
+            %b not fixed
 
 %p=will_paginate @reports
 -domain = 'http://lh:3000/'

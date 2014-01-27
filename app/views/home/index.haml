@@ -1,80 +1,21 @@
-:css
-  .dotted { font-size: 12px; text-decoration: none;font-family: "Trebuchet MS"; border-bottom: 1px dotted #38e; }
 
-%p
-  Welcome, 
-  %b=current_user.email
-  =link_to "Sign out", destroy_session_path(current_user), method: :delete
+1. Account hijacking by adding Attacker’s Provider account as sign-in option.
 
--if @reports.empty?
-  %p No errors yet.
--else
-  %table
-    %th #
-    %th Type
-    %th File
-    %th Line
-    %th Agent
-    %th Noticed On
-    %th Status
-    -for r in @reports
-      %tr
-        %td=r.id
-        %td=r.etype
-        %td=link_to r.efile, r.efile, class:'dotted'
-        %td=r.eline
-        %td=r.agent
-        %td=r.created_at.to_time
-        %td
-          -if r.status != 1
-            %b not fixed
++ state fixation
 
-%p=will_paginate @reports
--domain = 'http://lh:3000/'
--domain = 'http://clientsit.heroku.com/'
+2. Account hijacking by session fixation on Provider (login CSRF, header injection, cookie forcing or tossing).
 
--uid = current_user.id
-%p
-  %textarea{cols:80,rows:20}
-    :preserve
-      //YSoSlow/ClientSit
-      //put this code right after <head>
 
-      (function(w, report_to){
-        w.onerror=function(a,b,c){
-          if(!w._clientsit){
-            w._clientsit={pipe:0,log:[]}
-            if(w.localStorage._clientsitlog){
-              var parsed = JSON.parse(w.localStorage._clientsitlog);
-              if(parsed.length>0){
-                w._clientsit.log = parsed;         
-              }
-            }
-          }
-          if(w._clientsit.log.indexOf(a)==-1){
-            w._clientsit.log.push(a);
-            w.localStorage._clientsitlog = JSON.stringify(w._clientsit.log);
-            var i = document.createElement('script');
-            i.src = report_to+'report?report[user_id]=#{uid}'+
-            '&report[agent]='+encodeURI(w.navigator.userAgent)+
-            '&report[etype]='+encodeURI(a)+
-            '&report[efile]='+encodeURI(b)+
-            '&report[eline]='+encodeURI(c);
+3. Account hijacking by using access_token issued for other Client.
 
-            var to=(document.head || document.body);
-            if(to){
-              to.appendChild(i);
-            }else{
-              window.onload = (function(){
-                (document.body || document.head).appendChild(i);              
-              })
-            }
-          }
-        }
-      })(window, '#{domain}');
+4. Account hijacking by leaking Client’s real signed_request (official JS SDK, signed_request based implementations are vulnerable)
 
-%p
-  %a.dotted{onclick:''} code for embeding(put it right after < HEAD > tag)
-      
-%b.small
-  YSoSlow?
+5. Account hijacking by connecting Attacker’s signed_request with CSRF. (php-sdk, $2500 bounty, omniauth-facebook bug)
+
+6. Account hijacking by leaking ‘code’ with Referer (and not checking redirect_uri to obtain token)
+VK example
+
+7. Facebook -> Other Provider -> Client leakage. (songkick, soundcloud, etc) or #_=_
+
+
+

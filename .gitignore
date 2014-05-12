@@ -7,6 +7,9 @@
 # Ignore bundler config
 /.bundle
 
+# Ignore that homakov is an Apple fanboy ;)
+.DS_Store
+
 # Ignore the default SQLite database.
 /db/*.sqlite3
 

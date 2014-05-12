@@ -3,8 +3,8 @@
 <html class=" js flexbox flexboxlegacy canvas canvastext webgl no-touch geolocation postmessage websqldatabase no-indexeddb hashchange history draganddrop websockets rgba hsla multiplebgs backgroundsize borderimage borderradius boxshadow textshadow opacity cssanimations csscolumns cssgradients cssreflections csstransforms csstransforms3d csstransitions fontface generatedcontent video audio localstorage sessionstorage webworkers applicationcache svg inlinesvg smil svgclippaths js flexbox flexboxlegacy canvas canvastext webgl no-touch geolocation postmessage websqldatabase indexeddb hashchange history draganddrop websockets rgba hsla multiplebgs backgroundsize borderimage borderradius boxshadow textshadow opacity cssanimations csscolumns cssgradients cssreflections csstransforms csstransforms3d csstransitions fontface generatedcontent video audio localstorage sessionstorage webworkers applicationcache svg inlinesvg smil svgclippaths"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta charset="utf-8">
     <title>OAuth Security</title>
-    <meta name="description" content="We do penetration testing, source code auditing and vulnerability assessments">
-    <meta name="keywords" content="Billing Security, Ruby on Rails Security, OAuth Security, Bitcoin Security, Framework Vulnerabilities, Egor Homakov">
+    <meta name="description" content="oauth security">
+    <meta name="keywords" content="oauth security">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link href="./Sakurity_files/css" rel="stylesheet" type="text/css">
@@ -44,7 +44,6 @@
 
 
 
-
 <article class="markdown-body entry-content" itemprop="mainContentOfPage"><h1>
 <a name="oauth-security-cheatsheet" class="anchor" href="#oauth-security-cheatsheet"><span class="octicon octicon-link"></span></a>OAuth Security Cheatsheet</h1>
 
@@ -54,7 +53,9 @@
 
 <p>OAuth is a critical functionality. It is responsible for access to sensitive user data, authentication and authorization. <strong>Poorly implemented OAuth is a reliable way to take over an account</strong>. Unlike XSS, it is easy to exploit, but hard to mitigate for victims (NoScript won't help, JavaScript is not required).</p>
 
-<p>Because of OAuth many startups including Soundcloud, Foursquare, Airbnb, About.me, Bit.ly, Pinterest, Digg, Stumbleupon, Songkick had account hijacking vulnerability. And a lot of websites are still vulnerable. <strong>Our motivation is to make people aware of "Social login" risks, and we encourage you to use OAuth very carefully.</strong></p>
+<p>Because of OAuth many startups including Soundcloud, Foursquare, Airbnb, About.me, Bit.ly, Pinterest, Digg, Stumbleupon, Songkick had an account hijacking vulnerability. And a lot of websites are still vulnerable. <strong>Our motivation is to make people aware of "Social login" risks, and we encourage you to use OAuth very carefully.</strong></p>
+
+<p>The cheatsheet <strong>does not</strong> explain how OAuth flows work, please look for it on <a href="http://oauth.net/">the official website</a>.</p>
 
 <h2>
 <a name="authorization-code-flow" class="anchor" href="#authorization-code-flow"><span class="octicon octicon-link"></span></a>Authorization Code flow</h2>
@@ -100,7 +101,7 @@ This threat is client's business too, but many libraries remain vulnerable. <str
 
 <p>OAuth documentation makes it clear that providers must check the first <code>redirect_uri</code> is equal <code>redirect_uri</code> client uses to obtain <code>access_token</code>. 
 We didn't really check this because it looked too hard to get it wrong.
-Surprisingly <strong>many</strong> providers got it wrong: Foursquare (reported), VK (<a href="http://habrahabr.ru/post/150756/#comment_5116061">report, in Russian</a>, Github (<a href="http://homakov.blogspot.com/2014/02/how-i-hacked-github-again.html">could be used to leak tokens to private repos</a>), and a lot of "home made" Single Sign Ons.</p>
+Surprisingly <strong>many</strong> providers got it wrong: Foursquare (reported), VK (<a href="http://habrahabr.ru/post/150756/#comment_5116061">report, in Russian</a>), Github (<a href="http://homakov.blogspot.com/2014/02/how-i-hacked-github-again.html">could be used to leak tokens to private repos</a>), and a lot of "home made" Single Sign Ons.</p>
 
 <p>The attack is straightforward: find a leaking page on client's domain, insert cross domain image or a link to your website, then use this page as <code>redirect_uri</code>.
 When your victim will load crafted URL it will send him to <code>leaking_page?code=CODE</code> and victim's user-agent will expose the code in the Referrer header.</p>
@@ -117,7 +118,7 @@ When your victim will load crafted URL it will send him to <code>leaking_page?co
 <h3>
 <a name="leaking-access_tokensigned_request-with-an-open-redirect" class="anchor" href="#leaking-access_tokensigned_request-with-an-open-redirect"><span class="octicon octicon-link"></span></a>Leaking access_token/signed_request with an open redirect.</h3>
 
-<p>It was a media hype <a href="http://homakov.blogspot.com/2014/05/covert-redirect-faq.html">called "cover redirect"</a> but in fact it was known for years. You simply need to find an open redirect on client's domain or its subdomains, send it as <code>redirect_uri</code> and replace <code>response_type</code> to <code>token,signed_request</code>. 302 redirect will preserve #fragment, and attacker's Javascript code will have access to location.hash.</p>
+<p>It was a media hype <a href="http://homakov.blogspot.com/2014/05/covert-redirect-faq.html">called "cover redirect"</a> but in fact it was known for years. You simply need to find an open redirect on client's domain or its subdomains, send it as <code>redirect_uri</code> and replace <code>response_type</code> with <code>token,signed_request</code>. 302 redirect will preserve #fragment, and attacker's Javascript code will have access to location.hash.</p>
 
 <p>Leaked access_tokens can be used for spam and ruining your privacy. 
 Furthermore, leaked signed_request is even more sensitive data. By finding an open redirect on client you compromise Login with Facebook completely.</p>
@@ -165,7 +166,7 @@ This bug is relevant to mobile and client-side apps, because they often use acce
 
 <p>Many startups have Facebook Connect, and at the same time they are providers too. Being providers, they must redirect users to 3rd party websites, and those are "open redirects" you just cannot fix. It makes this chain possible: Facebook -&gt; Middleware Provider -&gt; Client's token leakage.</p>
 
-<p>To fix this problem Facebook adds #<em>=</em> in the end of callback URLs. Your startup should "kill" fragment to prevent leaking. Redirect this way:</p>
+<p>To fix this problem Facebook adds <code>#_=_</code> in the end of callback URLs. Your startup should "kill" fragment to prevent leaking. Redirect this way:</p>
 
 <p><code>Location: YOUR_CLIENT/callback?code=code#</code></p>
 
@@ -178,18 +179,17 @@ This bug is relevant to mobile and client-side apps, because they often use acce
 <li><p>/old/path/../../new/path</p></li>
 <li><p>/old/path/%2e%2e/%2e%2e/new/path</p></li>
 <li><p>/old/path/%252e%252e/%252e%252e/new/path</p></li>
-<li><p>/new/path///../../new/path/</p></li>
-<li><p>/.%0a./.%0d./ (For Rails, because it strips \n\d\0)</p></li>
+<li><p>/new/path///../../old/path/</p></li>
+<li><p>/old/path/.%0a./.%0d./new/path (For Rails, because it strips \n\d\0)</p></li>
 </ol><h3>
 <a name="replay-attack" class="anchor" href="#replay-attack"><span class="octicon octicon-link"></span></a>Replay attack.</h3>
 
-<p><code>code</code> is sent via GET and will be stored in server logs. Providers should delete it after use and or after 5 minutes.</p>
+<p><code>code</code> is sent via GET and potentionally will be stored in the logs. Providers must delete it after use or expire in 5 minutes.</p>
 
 <h2>
 <a name="contributors" class="anchor" href="#contributors"><span class="octicon octicon-link"></span></a>Contributors</h2>
 
 <p><a href="http://twitter.com/homakov">@homakov</a> and <a href="http://github.com/homakov/oauthsecurity">you?</a></p></article>
-
 
 
 
@@ -207,13 +207,8 @@ This bug is relevant to mobile and client-side apps, because they often use acce
         <hr>
     </div>
 </div>
-
-
-
 <script src="./Sakurity_files/vendor.js"></script>
 
 <script src="./Sakurity_files/main.js"></script>
-
-
 
 </body></html>

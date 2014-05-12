@@ -49,7 +49,7 @@ This threat is client's business too, but many libraries remain vulnerable. **Do
 ### Account hijacking by leaking authorization code.
 OAuth documentation makes it clear that providers must check the first `redirect_uri` is equal `redirect_uri` client uses to obtain `access_token`. 
 We didn't really check this because it looked too hard to get it wrong.
-Surprisingly **many** providers got it wrong: Foursquare (reported), VK ([report, in Russian](http://habrahabr.ru/post/150756/#comment_5116061), Github ([could be used to leak tokens to private repos](http://homakov.blogspot.com/2014/02/how-i-hacked-github-again.html)), and a lot of "home made" Single Sign Ons.
+Surprisingly **many** providers got it wrong: Foursquare (reported), VK ([report, in Russian](http://habrahabr.ru/post/150756/#comment_5116061)), Github ([could be used to leak tokens to private repos](http://homakov.blogspot.com/2014/02/how-i-hacked-github-again.html)), and a lot of "home made" Single Sign Ons.
 
 The attack is straightforward: find a leaking page on client's domain, insert cross domain image or a link to your website, then use this page as `redirect_uri`.
 When your victim will load crafted URL it will send him to `leaking_page?code=CODE` and victim's user-agent will expose the code in the Referrer header.
@@ -102,7 +102,7 @@ This is not a severe vulnerability because it is mostly based on phishing. [FYI 
 ### Provider In The Middle.
 Many startups have Facebook Connect, and at the same time they are providers too. Being providers, they must redirect users to 3rd party websites, and those are "open redirects" you just cannot fix. It makes this chain possible: Facebook -> Middleware Provider -> Client's token leakage.
 
-To fix this problem Facebook adds #_=_ in the end of callback URLs. Your startup should "kill" fragment to prevent leaking. Redirect this way:
+To fix this problem Facebook adds `#_=_` in the end of callback URLs. Your startup should "kill" fragment to prevent leaking. Redirect this way:
 
 `Location: YOUR_CLIENT/callback?code=code#`
 
@@ -116,12 +116,12 @@ If you are allowed to set subdirectory here are path traversal tricks:
 
 3. /old/path/%252e%252e/%252e%252e/new/path
 
-4. /new/path///../../new/path/
+4. /new/path///../../old/path/
 
-5. /.%0a./.%0d./ (For Rails, because it strips \n\d\0)
+5. /old/path/.%0a./.%0d./new/path (For Rails, because it strips \n\d\0)
 
 ### Replay attack.
-`code` is sent via GET and will be stored in server logs. Providers should delete it after use and or after 5 minutes.
+`code` is sent via GET and potentionally will be stored in the logs. Providers must delete it after use or expire in 5 minutes.
 
 ## Contributors
 [@homakov](http://twitter.com/homakov) and [you?](http://github.com/homakov/oauthsecurity)

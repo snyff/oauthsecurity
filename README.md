@@ -4,9 +4,9 @@ This document aims to describe common OAuth/Single Sign On/OpenID-related vulner
 
 Both hackers and developers can benefit from reading it.
 
-OAuth is a critical functionality. It is responsible for access to sensitive user data, authentication and authorization. **Poorly implemented OAuth is a reliable way to hijack user account**. Unlike XSS, it is easy to exploit, but hard to mitigate for victims (NoScript won't help, JavaScript is not required).
+OAuth is a critical functionality. It is responsible for access to sensitive user data, authentication and authorization. **Poorly implemented OAuth is a reliable way to take account over**. Unlike XSS, it is easy to exploit, but hard to mitigate for victims (NoScript won't help, JavaScript is not required).
 
-Because of OAuth a while ago Soundcloud, Foursquare, Airbnb, About.me, Bit.ly, Pinterest, Digg, Stumbleupon, Songkick and many other startups had account hijacking vulnerability. And many of them are still vulnerable. Our motivation is to make people aware of "Social login" risks.
+Because of OAuth a while ago Soundcloud, Foursquare, Airbnb, About.me, Bit.ly, Pinterest, Digg, Stumbleupon, Songkick and other startups had account hijacking vulnerability. And many websites are vulnerable right. **Our motivation is to make people aware of "Social login" risks, we encourage you to use OAuth very carefully.**
 
 ## Authorization Code flow
 
@@ -52,7 +52,9 @@ Surprisingly **many** providers got it wrong: Foursquare (reported), VK ([report
 
 The attack is straightforward: find a leaking page on client's domain, insert cross domain image or a link to your website, then use this page as `redirect_uri`.
 When your victim will load crafted URL it will send him to `leaking_page?code=CODE` and victim's user-agent will expose the code in the Referrer header.
+
 ![](http://3.bp.blogspot.com/-CnQQ9kjPoVs/UvT_O0m5uqI/AAAAAAAADkE/_Rl_EYv4ACQ/s1600/Screen+Shot+2014-02-05+at+5.15.39+PM.png)
+
 Now you can re-use leaked authorization code on the actual `redirect_uri` to log in in victim account.
 
 **Remediation**: flexible `redirect_uri` is a bad practise. But if you need it, store redirect_uri for every code you issue and verify it on access_token creation.
@@ -67,6 +69,7 @@ Leaked access_tokens can be used for spam and ruining your privacy.
 Furthermore, leaked signed_request is even more sensitive data. By finding an open redirect on client you compromise Login with Facebook completely.
 
 **Remediation**: whitelist one redirect_uri in app's settings:
+
 ![](http://4.bp.blogspot.com/-gUuXr1_G5HA/U2PsbZto1CI/AAAAAAAADr8/Vaj3sWfKBnM/s1600/Screen+Shot+2014-05-02+at+3.04.10+PM.png)
 
 ###Account hijacking by using access_token issued for attacker's client. 
@@ -99,18 +102,24 @@ To fix this problem Facebook adds #_=_ in the end of callback URLs. Your startup
 `Location: YOUR_CLIENT/callback?code=code#`
 
 ### Tricks to bypass redirect_uri validation
+
 If you are allowed to set subdirectory here are path traversal tricks:
+
 1. /old/path/../../new/path
+
 2. /old/path/%2e%2e/%2e%2e/new/path
+
 3. /old/path/%252e%252e/%252e%252e/new/path
+
 4. /new/path///../../new/path/
+
 5. /.%0a./.%0d./ (For Rails, because it strips \n\d\0)
 
 ### Replay attack.
 `code` is sent via GET and will be stored in server logs. Providers should delete it after use and or after 5 minutes.
 
-
-
+## Contributors
+[@homakov](http://twitter.com/homakov), [@isciurus](http://twitter.com/isciurus) and [you?](http://github.com)
 
 
 

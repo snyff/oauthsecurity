@@ -1,0 +1,217 @@
+
+<!-- saved from url=(0031)http://paulmillr.com/oauth.html -->
+<html class=" js flexbox flexboxlegacy canvas canvastext webgl no-touch geolocation postmessage websqldatabase no-indexeddb hashchange history draganddrop websockets rgba hsla multiplebgs backgroundsize borderimage borderradius boxshadow textshadow opacity cssanimations csscolumns cssgradients cssreflections csstransforms csstransforms3d csstransitions fontface generatedcontent video audio localstorage sessionstorage webworkers applicationcache svg inlinesvg smil svgclippaths js flexbox flexboxlegacy canvas canvastext webgl no-touch geolocation postmessage websqldatabase indexeddb hashchange history draganddrop websockets rgba hsla multiplebgs backgroundsize borderimage borderradius boxshadow textshadow opacity cssanimations csscolumns cssgradients cssreflections csstransforms csstransforms3d csstransitions fontface generatedcontent video audio localstorage sessionstorage webworkers applicationcache svg inlinesvg smil svgclippaths"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <title>OAuth Security</title>
+    <meta name="description" content="We do penetration testing, source code auditing and vulnerability assessments">
+    <meta name="keywords" content="Billing Security, Ruby on Rails Security, OAuth Security, Bitcoin Security, Framework Vulnerabilities, Egor Homakov">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="./Sakurity_files/css" rel="stylesheet" type="text/css">
+
+    <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+
+    <link rel="stylesheet" href="http://sakurity.com/styles/vendor.css">
+
+    <link rel="stylesheet" href="http://sakurity.com/styles/main.css">
+
+    <script type="text/javascript" async="" src="./Sakurity_files/ga.js"></script><script src="./Sakurity_files/modernizr.js"></script><style type="text/css"></style>
+<meta class="foundation-data-attribute-namespace"><meta class="foundation-mq-xxlarge"><meta class="foundation-mq-xlarge"><meta class="foundation-mq-large"><meta class="foundation-mq-medium"><meta class="foundation-mq-small"><style></style><style></style></head>
+<body>
+<!--[if lt IE 10]>
+<p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade
+    your browser</a> to improve your experience.</p>
+<![endif]-->
+
+<nav class="top-bar row" data-topbar="">
+    <section class="top-bar-section">
+        <ul class="right">
+
+        </ul>
+
+        <ul class="left">
+            <li>
+                <div class="logo-header"></div>
+            </li>
+        </ul>
+    </section>
+</nav>
+
+<section>
+    <div class="row">
+        <div id="readme" class="announce md">
+
+
+
+
+
+
+
+
+<article class="markdown-body entry-content" itemprop="mainContentOfPage"><h1>
+<a name="user-content-oauth-security-cheatsheet" class="anchor" href="#oauth-security-cheatsheet"><span class="octicon octicon-link"></span></a>OAuth Security Cheatsheet</h1>
+
+<p>This document aims to describe common OAuth/Single Sign On/OpenID-related vulnerabilities. Many cross-site interactions are vulnerable to different kinds of leakings and hijackings - we saw account hijacking on almost every popular startup with "social login" feature.</p>
+
+<p>Both hackers and developers can benefit from reading it.</p>
+
+<p>OAuth is a critical functionality. It is responsible for access to sensitive user data, authentication and authorization. <strong>Poorly implemented OAuth is a reliable way to take account over</strong>. Unlike XSS, it is easy to exploit, but hard to mitigate for victims (NoScript won't help, JavaScript is not required).</p>
+
+<p>Because of OAuth a while ago Soundcloud, Foursquare, Airbnb, About.me, Bit.ly, Pinterest, Digg, Stumbleupon, Songkick and other startups had account hijacking vulnerability. And many websites are vulnerable right. <strong>Our motivation is to make people aware of "Social login" risks, we encourage you to use OAuth very carefully.</strong></p>
+
+<h2>
+<a name="user-content-authorization-code-flow" class="anchor" href="#authorization-code-flow"><span class="octicon octicon-link"></span></a>Authorization Code flow</h2>
+
+<h3>
+<a name="user-content-client-account-hijacking-by-connecting-attackers-provider-account" class="anchor" href="#client-account-hijacking-by-connecting-attackers-provider-account"><span class="octicon octicon-link"></span></a>Client account hijacking by connecting attacker's Provider account.</h3>
+
+<p><a href="http://homakov.blogspot.com/2012/07/saferweb-most-common-oauth2.html">as known as The Most Common OAuth2 Vulnerability</a></p>
+
+<p>Provider returns <code>code</code> by redirecting user-agent to <code>SITE/oauth/callback?code=CODE</code>
+Now client must send <code>code</code> along with client credentials and <code>redirect_uri</code> to obtain <code>access_token</code>. </p>
+
+<p>If client implementation doesn't use <code>state</code> parameter to mitigate CSRF, we can easily connect <strong>our provider account</strong> to <strong>victim's client account</strong>.</p>
+
+<p><a href="https://camo.githubusercontent.com/b8a60505f8726f5d0eb24972c125051879dd0acf/687474703a2f2f342e62702e626c6f6773706f742e636f6d2f2d5a7047536b6747534436592f5554426e644b31737962492f414141414141414142706b2f66765749556e64456579672f733332302f6d616c2e706e67" target="_blank"><img src="https://camo.githubusercontent.com/b8a60505f8726f5d0eb24972c125051879dd0acf/687474703a2f2f342e62702e626c6f6773706f742e636f6d2f2d5a7047536b6747534436592f5554426e644b31737962492f414141414141414142706b2f66765749556e64456579672f733332302f6d616c2e706e67" alt="" data-canonical-src="http://4.bp.blogspot.com/-ZpGSkgGSD6Y/UTBndK1sybI/AAAAAAAABpk/fvWIUndEeyg/s320/mal.png" style="max-width:100%;"></a></p>
+
+<p>It works for clients with social login and ability to add a login option to existing master account (screenshots of pinterest.com below).</p>
+
+<p><a href="https://camo.githubusercontent.com/4453cbac3eb1f8133cfc17623f86d89290fefdfc/687474703a2f2f322e62702e626c6f6773706f742e636f6d2f2d4f5831494c38786e306b4d2f545f4c6e316478344769492f4141414141414141414d6b2f6f4b654678795a757430492f733332302f53637265656e73686f742b2d2b30373033323031322b2d2b30343a33373a30362b504d2e706e67" target="_blank"><img src="https://camo.githubusercontent.com/4453cbac3eb1f8133cfc17623f86d89290fefdfc/687474703a2f2f322e62702e626c6f6773706f742e636f6d2f2d4f5831494c38786e306b4d2f545f4c6e316478344769492f4141414141414141414d6b2f6f4b654678795a757430492f733332302f53637265656e73686f742b2d2b30373033323031322b2d2b30343a33373a30362b504d2e706e67" alt="" data-canonical-src="http://2.bp.blogspot.com/-OX1IL8xn0kM/T_Ln1dx4GiI/AAAAAAAAAMk/oKeFxyZut0I/s320/Screenshot+-+07032012+-+04:37:06+PM.png" style="max-width:100%;"></a></p>
+
+<p><a href="https://camo.githubusercontent.com/13bea5235b2e0d26a1cceb8da161746e7da9294f/687474703a2f2f332e62702e626c6f6773706f742e636f6d2f2d33726e39786a75335169492f545f4c6e312d6834585a492f4141414141414141414d6f2f504c736a316a4a444154492f733332302f53637265656e73686f742b2d2b30373033323031322b2d2b30343a33383a32352b504d2e706e67" target="_blank"><img src="https://camo.githubusercontent.com/13bea5235b2e0d26a1cceb8da161746e7da9294f/687474703a2f2f332e62702e626c6f6773706f742e636f6d2f2d33726e39786a75335169492f545f4c6e312d6834585a492f4141414141414141414d6f2f504c736a316a4a444154492f733332302f53637265656e73686f742b2d2b30373033323031322b2d2b30343a33383a32352b504d2e706e67" alt="connect options" data-canonical-src="http://3.bp.blogspot.com/-3rn9xju3QiI/T_Ln1-h4XZI/AAAAAAAAAMo/PLsj1jJDATI/s320/Screenshot+-+07032012+-+04:38:25+PM.png" style="max-width:100%;"></a></p>
+
+<p><strong>Remediation</strong>: Before sending user to provider generate a random nonce and save it in cookies or session. When user is back make sure <code>state</code> you received is equal one from cookies.</p>
+
+<p><strong>State fixation bug</strong>: It was possible to fixate <code>state</code> <a href="https://github.com/mkdynamic/omniauth-facebook/wiki/CSRF-vulnerability:-CVE-2013-4562">in omniauth</a> because of <a href="https://github.com/mkdynamic/omniauth-facebook/blob/c277322722b6e8fba1eadf9de74927b73fbb86ea/lib/omniauth/strategies/facebook.rb#L105">legacy code</a> which utilized user supplied <code>/connect?state=user_supplied</code> instead of generating a random one. 
+This is another OAuth design issue - sometimes developers want to use <code>state</code> for own purposes. You can try to send both values concatenated in one <code>state=welcome_landing.random_nonce</code></p>
+
+<h3>
+<a name="user-content-client-account-hijacking-abusing-session-fixation-on-provider" class="anchor" href="#client-account-hijacking-abusing-session-fixation-on-provider"><span class="octicon octicon-link"></span></a>Client account hijacking abusing session fixation on provider</h3>
+
+<p>This is a higher level of the first vulnerability. Even when client properly validates <code>state</code> it is possible to replace auth cookies on provider with attacker's account: CSRF on login (VK, Facebook), header injection, cookie forcing or tossing. </p>
+
+<p>Then just load GET request triggering connect (<code>/user/auth/facebook</code> in omniauth), Facebook will respond with attacker's user info (uid=attacker's uid) and it will eventually connect attacker's provider account to victim's client account.</p>
+
+<p><strong>Remediation</strong>: make sure that adding a new social connection requires a valid csrf_token, so it is not possible to trigger process with CSRF. Ideally, use POST instead of GET. 
+<a href="http://homakov.blogspot.com/2014/01/two-severe-wontfix-vulnerabilities-in.html">Facebook refused to fix CSRF on login from their side.</a>
+This threat is client's business too, but many libraries remain vulnerable. <strong>Do not expect providers to give you reliable authentication data</strong>. </p>
+
+<h3>
+<a name="user-content-account-hijacking-by-leaking-authorization-code" class="anchor" href="#account-hijacking-by-leaking-authorization-code"><span class="octicon octicon-link"></span></a>Account hijacking by leaking authorization code.</h3>
+
+<p>OAuth documentation clearly says that providers must check first <code>redirect_uri</code> is equal <code>redirect_uri</code> client uses to obtain <code>access_token</code>. 
+We didn't really check this because it looked too hard to get it wrong.
+Surprisingly <strong>many</strong> providers got it wrong: Foursquare (reported), VK (<a href="http://habrahabr.ru/post/150756/#comment_5116061">report, in Russian</a>, Github (<a href="http://homakov.blogspot.com/2014/02/how-i-hacked-github-again.html">could be used to leak tokens to private repos</a>), and many more "home made" Single Sign Ons.</p>
+
+<p>The attack is straightforward: find a leaking page on client's domain, insert cross domain image or a link to your website, then use this page as <code>redirect_uri</code>.
+When your victim will load crafted URL it will send him to <code>leaking_page?code=CODE</code> and victim's user-agent will expose the code in the Referrer header.</p>
+
+<p><a href="https://camo.githubusercontent.com/ea92780497830b25aa4e74859ef42ed4d03a2a8a/687474703a2f2f332e62702e626c6f6773706f742e636f6d2f2d436e5151396b6a506f56732f5576545f4f306d357571492f4141414141414141446b452f5f526c5f455976344143512f73313630302f53637265656e2b53686f742b323031342d30322d30352b61742b352e31352e33392b504d2e706e67" target="_blank"><img src="https://camo.githubusercontent.com/ea92780497830b25aa4e74859ef42ed4d03a2a8a/687474703a2f2f332e62702e626c6f6773706f742e636f6d2f2d436e5151396b6a506f56732f5576545f4f306d357571492f4141414141414141446b452f5f526c5f455976344143512f73313630302f53637265656e2b53686f742b323031342d30322d30352b61742b352e31352e33392b504d2e706e67" alt="" data-canonical-src="http://3.bp.blogspot.com/-CnQQ9kjPoVs/UvT_O0m5uqI/AAAAAAAADkE/_Rl_EYv4ACQ/s1600/Screen+Shot+2014-02-05+at+5.15.39+PM.png" style="max-width:100%;"></a></p>
+
+<p>Now you can re-use leaked authorization code on the actual <code>redirect_uri</code> to log in in victim account.</p>
+
+<p><strong>Remediation</strong>: flexible <code>redirect_uri</code> is a bad practise. But if you need it, store redirect_uri for every code you issue and verify it on access_token creation.</p>
+
+<h2>
+<a name="user-content-implicit-flow" class="anchor" href="#implicit-flow"><span class="octicon octicon-link"></span></a>Implicit flow</h2>
+
+<h3>
+<a name="user-content-leaking-access_tokensigned_request-with-an-open-redirect" class="anchor" href="#leaking-access_tokensigned_request-with-an-open-redirect"><span class="octicon octicon-link"></span></a>Leaking access_token/signed_request with an open redirect.</h3>
+
+<p>It was a media hype <a href="http://homakov.blogspot.com/2014/05/covert-redirect-faq.html">called "cover redirect"</a> but in fact it was known for years. You simply need to find an open redirect on client's domain or its subdomains, send it as <code>redirect_uri</code> and replace <code>response_type</code> to <code>token,signed_request</code>. 302 redirect will preserve #fragment, and attacker's Javascript code will have access to location.hash.</p>
+
+<p>Leaked access_tokens can be used for spam and ruining your privacy. 
+Furthermore, leaked signed_request is even more sensitive data. By finding an open redirect on client you compromise Login with Facebook completely.</p>
+
+<p><strong>Remediation</strong>: whitelist one redirect_uri in app's settings:</p>
+
+<p><a href="https://camo.githubusercontent.com/331570d7cba38f8081b72b5e1c1128449a0d3de4/687474703a2f2f342e62702e626c6f6773706f742e636f6d2f2d6755755872315f473548412f55325073625a746f3143492f41414141414141414472382f56616a337357664b426e4d2f73313630302f53637265656e2b53686f742b323031342d30352d30322b61742b332e30342e31302b504d2e706e67" target="_blank"><img src="https://camo.githubusercontent.com/331570d7cba38f8081b72b5e1c1128449a0d3de4/687474703a2f2f342e62702e626c6f6773706f742e636f6d2f2d6755755872315f473548412f55325073625a746f3143492f41414141414141414472382f56616a337357664b426e4d2f73313630302f53637265656e2b53686f742b323031342d30352d30322b61742b332e30342e31302b504d2e706e67" alt="" data-canonical-src="http://4.bp.blogspot.com/-gUuXr1_G5HA/U2PsbZto1CI/AAAAAAAADr8/Vaj3sWfKBnM/s1600/Screen+Shot+2014-05-02+at+3.04.10+PM.png" style="max-width:100%;"></a></p>
+
+<h3>
+<a name="user-content-account-hijacking-by-using-access_token-issued-for-attackers-client" class="anchor" href="#account-hijacking-by-using-access_token-issued-for-attackers-client"><span class="octicon octicon-link"></span></a>Account hijacking by using access_token issued for attacker's client.</h3>
+
+<p><a href="http://homakov.blogspot.com/2012/08/oauth2-one-accesstoken-to-rule-them-all.html">as known as One Token to Rule Them All</a>.
+This bug is relevant to mobile and client-side apps, because they often use access_token directly supplied by user. </p>
+
+<p>Imagine, user has many "authorization rings" and gives a ring to every new website where he wants to log in. A malicious website admin can use rings of its users to log in other websites the users use.</p>
+
+<p><a href="https://camo.githubusercontent.com/7e380a77f977a251f7f7a631822134ffc87b82e7/687474703a2f2f342e62702e626c6f6773706f742e636f6d2f2d58726a474e3634526f65342f5554426f357171643767492f41414141414141414270302f58435467305061534761552f733332302f6d616c2b2832292e706e67" target="_blank"><img src="https://camo.githubusercontent.com/7e380a77f977a251f7f7a631822134ffc87b82e7/687474703a2f2f342e62702e626c6f6773706f742e636f6d2f2d58726a474e3634526f65342f5554426f357171643767492f41414141414141414270302f58435467305061534761552f733332302f6d616c2b2832292e706e67" alt="" data-canonical-src="http://4.bp.blogspot.com/-XrjGN64Roe4/UTBo5qqd7gI/AAAAAAAABp0/XCTg0PaSGaU/s320/mal+(2).png" style="max-width:100%;"></a></p>
+
+<p><strong>Remediation</strong>: Before accepting user supplied access_token check if it was issued for your client_id at <code>https://graph.facebook.com/app?fields=id&amp;access_token=TOKEN</code></p>
+
+<h2>
+<a name="user-content-transport-level-and-js-sdk-bugs" class="anchor" href="#transport-level-and-js-sdk-bugs"><span class="octicon octicon-link"></span></a>Transport level and JS SDK bugs</h2>
+
+<h3>
+<a name="user-content-xss-with-rpc" class="anchor" href="#xss-with-rpc"><span class="octicon octicon-link"></span></a>XSS with RPC</h3>
+
+<h2>
+<a name="user-content-extra" class="anchor" href="#extra"><span class="octicon octicon-link"></span></a>Extra</h2>
+
+<h3>
+<a name="user-content-leaked-client-credentials-threat" class="anchor" href="#leaked-client-credentials-threat"><span class="octicon octicon-link"></span></a>Leaked client credentials threat</h3>
+
+<p>Client credetials are not as important as it sounds. All you can do is using leaking pages to leak auth code, then manually getting an access_token for them (providing leaking redirect_uri instead of actual). Even this threat can be mitigated when provider uses static redirect_uri. </p>
+
+<h3>
+<a name="user-content-session-fixation-oauth10" class="anchor" href="#session-fixation-oauth10"><span class="octicon octicon-link"></span></a>Session fixation (OAuth1.0)</h3>
+
+<p>Main difference between OAuth2 and 1 is the way you transfer parameters to providers. In first version you send all parameters to provider and obtain according request_token. Then you navigate user to provider?request_token=TOKEN and after authorizing user is back to <code>client/callback?request_token=TOKEN</code>. The idea of fixation here is we can trick user into accepting Token1 which was issued for you, then re-use Token1 on client's callback.
+This is not a severe vulnerability because it is based on phishing. <a href="http://homakov.blogspot.com/2014/01/token-fixation-in-paypal.html">FYI Paypal express checkout has this bug</a></p>
+
+<h3>
+<a name="user-content-provider-in-the-middle-bug" class="anchor" href="#provider-in-the-middle-bug"><span class="octicon octicon-link"></span></a>Provider In The Middle bug.</h3>
+
+<p>Many startups have facebook connect and at the same time they are providers too. Providers must redirect users to 3rd party client's websites, and those are "open redirects" you just cannot fix. It makes this chain possible: Facebook -&gt; Middleware Provider -&gt; Client's token leakage.
+To fix this problem Facebook adds #<em>=</em> in the end of callback URLs. Your startup should "kill" fragment to prevent leaking.
+<code>Location: YOUR_CLIENT/callback?code=code#</code></p>
+
+<h3>
+<a name="user-content-tricks-to-bypass-redirect_uri-validation" class="anchor" href="#tricks-to-bypass-redirect_uri-validation"><span class="octicon octicon-link"></span></a>Tricks to bypass redirect_uri validation</h3>
+
+<p>If you are allowed to set subdirectory here are path traversal tricks:</p>
+
+<ol>
+<li><p>/old/path/../../new/path</p></li>
+<li><p>/old/path/%2e%2e/%2e%2e/new/path</p></li>
+<li><p>/old/path/%252e%252e/%252e%252e/new/path</p></li>
+<li><p>/new/path///../../new/path/</p></li>
+<li><p>/.%0a./.%0d./ (For Rails, because it strips \n\d\0)</p></li>
+</ol><h3>
+<a name="user-content-replay-attack" class="anchor" href="#replay-attack"><span class="octicon octicon-link"></span></a>Replay attack.</h3>
+
+<p><code>code</code> is sent via GET and will be stored in server logs. Providers should delete it after use and or after 5 minutes.</p>
+
+<h2>
+<a name="user-content-contributors" class="anchor" href="#contributors"><span class="octicon octicon-link"></span></a>Contributors</h2>
+
+<p><a href="http://twitter.com/homakov">@homakov</a>, <a href="http://twitter.com/isciurus">@isciurus</a> and <a href="http://github.com">you?</a></p></article>
+
+
+
+
+
+
+
+
+
+            </div>
+
+    </div>
+</section>
+
+<div style="display:none" class="row">
+    <div class="small-12 small-centered small-text-center columns">
+        <hr>
+    </div>
+</div>
+
+
+
+<script src="./Sakurity_files/vendor.js"></script>
+
+<script src="./Sakurity_files/main.js"></script>
+
+
+
+</body></html>

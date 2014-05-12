@@ -84,8 +84,7 @@ Imagine, user has many "authorization rings" and gives a ring to every new websi
 
 
 ## Transport level and JS SDK bugs
-### XSS with RPC
-
+(to be continued)
 
 ## Extra
 ### Leaked client credentials threat
@@ -119,7 +118,7 @@ If you are allowed to set subdirectory here are path traversal tricks:
 `code` is sent via GET and will be stored in server logs. Providers should delete it after use and or after 5 minutes.
 
 ## Contributors
-[@homakov](http://twitter.com/homakov), [@isciurus](http://twitter.com/isciurus) and [you?](http://github.com)
+[@homakov](http://twitter.com/homakov) and [you?](http://github.com/homakov/oauthsecurity)
 
 
 

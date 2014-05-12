@@ -6,7 +6,9 @@ Both hackers and developers can benefit from reading it.
 
 OAuth is a critical functionality. It is responsible for access to sensitive user data, authentication and authorization. **Poorly implemented OAuth is a reliable way to take over an account**. Unlike XSS, it is easy to exploit, but hard to mitigate for victims (NoScript won't help, JavaScript is not required).
 
-Because of OAuth many startups including Soundcloud, Foursquare, Airbnb, About.me, Bit.ly, Pinterest, Digg, Stumbleupon, Songkick had account hijacking vulnerability. And a lot of websites are still vulnerable. **Our motivation is to make people aware of "Social login" risks, and we encourage you to use OAuth very carefully.**
+Because of OAuth many startups including Soundcloud, Foursquare, Airbnb, About.me, Bit.ly, Pinterest, Digg, Stumbleupon, Songkick had an account hijacking vulnerability. And a lot of websites are still vulnerable. **Our motivation is to make people aware of "Social login" risks, and we encourage you to use OAuth very carefully.**
+
+The cheatsheet **does not** explain how OAuth flows work, please look for it on [the official website](http://oauth.net/).
 
 ## Authorization Code flow
 
@@ -64,7 +66,7 @@ Now you can re-use leaked authorization code on the actual `redirect_uri` to log
 ## Implicit flow
 
 ### Leaking access_token/signed_request with an open redirect. 
-It was a media hype [called "cover redirect"](http://homakov.blogspot.com/2014/05/covert-redirect-faq.html) but in fact it was known for years. You simply need to find an open redirect on client's domain or its subdomains, send it as `redirect_uri` and replace `response_type` to `token,signed_request`. 302 redirect will preserve #fragment, and attacker's Javascript code will have access to location.hash.
+It was a media hype [called "cover redirect"](http://homakov.blogspot.com/2014/05/covert-redirect-faq.html) but in fact it was known for years. You simply need to find an open redirect on client's domain or its subdomains, send it as `redirect_uri` and replace `response_type` with `token,signed_request`. 302 redirect will preserve #fragment, and attacker's Javascript code will have access to location.hash.
 
 Leaked access_tokens can be used for spam and ruining your privacy. 
 Furthermore, leaked signed_request is even more sensitive data. By finding an open redirect on client you compromise Login with Facebook completely.

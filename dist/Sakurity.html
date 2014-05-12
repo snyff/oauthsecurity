@@ -15,13 +15,12 @@
 
     <link rel="stylesheet" href="http://sakurity.com/styles/main.css">
 
+    <link href="https://github.global.ssl.fastly.net/assets/github-58e181c5cf58206dac2f13d435da7a71ca165593.css" media="all" rel="stylesheet" type="text/css" />
+    <link href="https://github.global.ssl.fastly.net/assets/github2-1a3c410b868af7031a33d9c381adc57fbdd76b68.css" media="all" rel="stylesheet" type="text/css" />
+    
     <script type="text/javascript" async="" src="./Sakurity_files/ga.js"></script><script src="./Sakurity_files/modernizr.js"></script><style type="text/css"></style>
 <meta class="foundation-data-attribute-namespace"><meta class="foundation-mq-xxlarge"><meta class="foundation-mq-xlarge"><meta class="foundation-mq-large"><meta class="foundation-mq-medium"><meta class="foundation-mq-small"><style></style><style></style></head>
 <body>
-<!--[if lt IE 10]>
-<p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade
-    your browser</a> to improve your experience.</p>
-<![endif]-->
 
 <nav class="top-bar row" data-topbar="">
     <section class="top-bar-section">
@@ -31,7 +30,7 @@
 
         <ul class="left">
             <li>
-                <div class="logo-header"></div>
+               <a style="background:fff" href="http://sakurity.com"> <div class="logo-header"></div></a>
             </li>
         </ul>
     </section>
@@ -49,7 +48,7 @@
 
 
 <article class="markdown-body entry-content" itemprop="mainContentOfPage"><h1>
-<a name="user-content-oauth-security-cheatsheet" class="anchor" href="#oauth-security-cheatsheet"><span class="octicon octicon-link"></span></a>OAuth Security Cheatsheet</h1>
+<a name="oauth-security-cheatsheet" class="anchor" href="#oauth-security-cheatsheet"><span class="octicon octicon-link"></span></a>OAuth Security Cheatsheet</h1>
 
 <p>This document aims to describe common OAuth/Single Sign On/OpenID-related vulnerabilities. Many cross-site interactions are vulnerable to different kinds of leakings and hijackings - we saw account hijacking on almost every popular startup with "social login" feature.</p>
 
@@ -60,10 +59,10 @@
 <p>Because of OAuth a while ago Soundcloud, Foursquare, Airbnb, About.me, Bit.ly, Pinterest, Digg, Stumbleupon, Songkick and other startups had account hijacking vulnerability. And many websites are vulnerable right. <strong>Our motivation is to make people aware of "Social login" risks, we encourage you to use OAuth very carefully.</strong></p>
 
 <h2>
-<a name="user-content-authorization-code-flow" class="anchor" href="#authorization-code-flow"><span class="octicon octicon-link"></span></a>Authorization Code flow</h2>
+<a name="authorization-code-flow" class="anchor" href="#authorization-code-flow"><span class="octicon octicon-link"></span></a>Authorization Code flow</h2>
 
 <h3>
-<a name="user-content-client-account-hijacking-by-connecting-attackers-provider-account" class="anchor" href="#client-account-hijacking-by-connecting-attackers-provider-account"><span class="octicon octicon-link"></span></a>Client account hijacking by connecting attacker's Provider account.</h3>
+<a name="client-account-hijacking-by-connecting-attackers-provider-account" class="anchor" href="#client-account-hijacking-by-connecting-attackers-provider-account"><span class="octicon octicon-link"></span></a>Client account hijacking by connecting attacker's Provider account.</h3>
 
 <p><a href="http://homakov.blogspot.com/2012/07/saferweb-most-common-oauth2.html">as known as The Most Common OAuth2 Vulnerability</a></p>
 
@@ -86,7 +85,7 @@ Now client must send <code>code</code> along with client credentials and <code>r
 This is another OAuth design issue - sometimes developers want to use <code>state</code> for own purposes. You can try to send both values concatenated in one <code>state=welcome_landing.random_nonce</code></p>
 
 <h3>
-<a name="user-content-client-account-hijacking-abusing-session-fixation-on-provider" class="anchor" href="#client-account-hijacking-abusing-session-fixation-on-provider"><span class="octicon octicon-link"></span></a>Client account hijacking abusing session fixation on provider</h3>
+<a name="client-account-hijacking-abusing-session-fixation-on-provider" class="anchor" href="#client-account-hijacking-abusing-session-fixation-on-provider"><span class="octicon octicon-link"></span></a>Client account hijacking abusing session fixation on provider</h3>
 
 <p>This is a higher level of the first vulnerability. Even when client properly validates <code>state</code> it is possible to replace auth cookies on provider with attacker's account: CSRF on login (VK, Facebook), header injection, cookie forcing or tossing. </p>
 
@@ -97,7 +96,7 @@ This is another OAuth design issue - sometimes developers want to use <code>stat
 This threat is client's business too, but many libraries remain vulnerable. <strong>Do not expect providers to give you reliable authentication data</strong>. </p>
 
 <h3>
-<a name="user-content-account-hijacking-by-leaking-authorization-code" class="anchor" href="#account-hijacking-by-leaking-authorization-code"><span class="octicon octicon-link"></span></a>Account hijacking by leaking authorization code.</h3>
+<a name="account-hijacking-by-leaking-authorization-code" class="anchor" href="#account-hijacking-by-leaking-authorization-code"><span class="octicon octicon-link"></span></a>Account hijacking by leaking authorization code.</h3>
 
 <p>OAuth documentation clearly says that providers must check first <code>redirect_uri</code> is equal <code>redirect_uri</code> client uses to obtain <code>access_token</code>. 
 We didn't really check this because it looked too hard to get it wrong.
@@ -113,10 +112,10 @@ When your victim will load crafted URL it will send him to <code>leaking_page?co
 <p><strong>Remediation</strong>: flexible <code>redirect_uri</code> is a bad practise. But if you need it, store redirect_uri for every code you issue and verify it on access_token creation.</p>
 
 <h2>
-<a name="user-content-implicit-flow" class="anchor" href="#implicit-flow"><span class="octicon octicon-link"></span></a>Implicit flow</h2>
+<a name="implicit-flow" class="anchor" href="#implicit-flow"><span class="octicon octicon-link"></span></a>Implicit flow</h2>
 
 <h3>
-<a name="user-content-leaking-access_tokensigned_request-with-an-open-redirect" class="anchor" href="#leaking-access_tokensigned_request-with-an-open-redirect"><span class="octicon octicon-link"></span></a>Leaking access_token/signed_request with an open redirect.</h3>
+<a name="leaking-access_tokensigned_request-with-an-open-redirect" class="anchor" href="#leaking-access_tokensigned_request-with-an-open-redirect"><span class="octicon octicon-link"></span></a>Leaking access_token/signed_request with an open redirect.</h3>
 
 <p>It was a media hype <a href="http://homakov.blogspot.com/2014/05/covert-redirect-faq.html">called "cover redirect"</a> but in fact it was known for years. You simply need to find an open redirect on client's domain or its subdomains, send it as <code>redirect_uri</code> and replace <code>response_type</code> to <code>token,signed_request</code>. 302 redirect will preserve #fragment, and attacker's Javascript code will have access to location.hash.</p>
 
@@ -128,7 +127,7 @@ Furthermore, leaked signed_request is even more sensitive data. By finding an op
 <p><a href="https://camo.githubusercontent.com/331570d7cba38f8081b72b5e1c1128449a0d3de4/687474703a2f2f342e62702e626c6f6773706f742e636f6d2f2d6755755872315f473548412f55325073625a746f3143492f41414141414141414472382f56616a337357664b426e4d2f73313630302f53637265656e2b53686f742b323031342d30352d30322b61742b332e30342e31302b504d2e706e67" target="_blank"><img src="https://camo.githubusercontent.com/331570d7cba38f8081b72b5e1c1128449a0d3de4/687474703a2f2f342e62702e626c6f6773706f742e636f6d2f2d6755755872315f473548412f55325073625a746f3143492f41414141414141414472382f56616a337357664b426e4d2f73313630302f53637265656e2b53686f742b323031342d30352d30322b61742b332e30342e31302b504d2e706e67" alt="" data-canonical-src="http://4.bp.blogspot.com/-gUuXr1_G5HA/U2PsbZto1CI/AAAAAAAADr8/Vaj3sWfKBnM/s1600/Screen+Shot+2014-05-02+at+3.04.10+PM.png" style="max-width:100%;"></a></p>
 
 <h3>
-<a name="user-content-account-hijacking-by-using-access_token-issued-for-attackers-client" class="anchor" href="#account-hijacking-by-using-access_token-issued-for-attackers-client"><span class="octicon octicon-link"></span></a>Account hijacking by using access_token issued for attacker's client.</h3>
+<a name="account-hijacking-by-using-access_token-issued-for-attackers-client" class="anchor" href="#account-hijacking-by-using-access_token-issued-for-attackers-client"><span class="octicon octicon-link"></span></a>Account hijacking by using access_token issued for attacker's client.</h3>
 
 <p><a href="http://homakov.blogspot.com/2012/08/oauth2-one-accesstoken-to-rule-them-all.html">as known as One Token to Rule Them All</a>.
 This bug is relevant to mobile and client-side apps, because they often use access_token directly supplied by user. </p>
@@ -140,34 +139,34 @@ This bug is relevant to mobile and client-side apps, because they often use acce
 <p><strong>Remediation</strong>: Before accepting user supplied access_token check if it was issued for your client_id at <code>https://graph.facebook.com/app?fields=id&amp;access_token=TOKEN</code></p>
 
 <h2>
-<a name="user-content-transport-level-and-js-sdk-bugs" class="anchor" href="#transport-level-and-js-sdk-bugs"><span class="octicon octicon-link"></span></a>Transport level and JS SDK bugs</h2>
+<a name="transport-level-and-js-sdk-bugs" class="anchor" href="#transport-level-and-js-sdk-bugs"><span class="octicon octicon-link"></span></a>Transport level and JS SDK bugs</h2>
 
 <h3>
-<a name="user-content-xss-with-rpc" class="anchor" href="#xss-with-rpc"><span class="octicon octicon-link"></span></a>XSS with RPC</h3>
+<a name="xss-with-rpc" class="anchor" href="#xss-with-rpc"><span class="octicon octicon-link"></span></a>XSS with RPC</h3>
 
 <h2>
-<a name="user-content-extra" class="anchor" href="#extra"><span class="octicon octicon-link"></span></a>Extra</h2>
+<a name="extra" class="anchor" href="#extra"><span class="octicon octicon-link"></span></a>Extra</h2>
 
 <h3>
-<a name="user-content-leaked-client-credentials-threat" class="anchor" href="#leaked-client-credentials-threat"><span class="octicon octicon-link"></span></a>Leaked client credentials threat</h3>
+<a name="leaked-client-credentials-threat" class="anchor" href="#leaked-client-credentials-threat"><span class="octicon octicon-link"></span></a>Leaked client credentials threat</h3>
 
 <p>Client credetials are not as important as it sounds. All you can do is using leaking pages to leak auth code, then manually getting an access_token for them (providing leaking redirect_uri instead of actual). Even this threat can be mitigated when provider uses static redirect_uri. </p>
 
 <h3>
-<a name="user-content-session-fixation-oauth10" class="anchor" href="#session-fixation-oauth10"><span class="octicon octicon-link"></span></a>Session fixation (OAuth1.0)</h3>
+<a name="session-fixation-oauth10" class="anchor" href="#session-fixation-oauth10"><span class="octicon octicon-link"></span></a>Session fixation (OAuth1.0)</h3>
 
 <p>Main difference between OAuth2 and 1 is the way you transfer parameters to providers. In first version you send all parameters to provider and obtain according request_token. Then you navigate user to provider?request_token=TOKEN and after authorizing user is back to <code>client/callback?request_token=TOKEN</code>. The idea of fixation here is we can trick user into accepting Token1 which was issued for you, then re-use Token1 on client's callback.
 This is not a severe vulnerability because it is based on phishing. <a href="http://homakov.blogspot.com/2014/01/token-fixation-in-paypal.html">FYI Paypal express checkout has this bug</a></p>
 
 <h3>
-<a name="user-content-provider-in-the-middle-bug" class="anchor" href="#provider-in-the-middle-bug"><span class="octicon octicon-link"></span></a>Provider In The Middle bug.</h3>
+<a name="provider-in-the-middle-bug" class="anchor" href="#provider-in-the-middle-bug"><span class="octicon octicon-link"></span></a>Provider In The Middle bug.</h3>
 
 <p>Many startups have facebook connect and at the same time they are providers too. Providers must redirect users to 3rd party client's websites, and those are "open redirects" you just cannot fix. It makes this chain possible: Facebook -&gt; Middleware Provider -&gt; Client's token leakage.
 To fix this problem Facebook adds #<em>=</em> in the end of callback URLs. Your startup should "kill" fragment to prevent leaking.
 <code>Location: YOUR_CLIENT/callback?code=code#</code></p>
 
 <h3>
-<a name="user-content-tricks-to-bypass-redirect_uri-validation" class="anchor" href="#tricks-to-bypass-redirect_uri-validation"><span class="octicon octicon-link"></span></a>Tricks to bypass redirect_uri validation</h3>
+<a name="tricks-to-bypass-redirect_uri-validation" class="anchor" href="#tricks-to-bypass-redirect_uri-validation"><span class="octicon octicon-link"></span></a>Tricks to bypass redirect_uri validation</h3>
 
 <p>If you are allowed to set subdirectory here are path traversal tricks:</p>
 
@@ -178,12 +177,12 @@ To fix this problem Facebook adds #<em>=</em> in the end of callback URLs. Your 
 <li><p>/new/path///../../new/path/</p></li>
 <li><p>/.%0a./.%0d./ (For Rails, because it strips \n\d\0)</p></li>
 </ol><h3>
-<a name="user-content-replay-attack" class="anchor" href="#replay-attack"><span class="octicon octicon-link"></span></a>Replay attack.</h3>
+<a name="replay-attack" class="anchor" href="#replay-attack"><span class="octicon octicon-link"></span></a>Replay attack.</h3>
 
 <p><code>code</code> is sent via GET and will be stored in server logs. Providers should delete it after use and or after 5 minutes.</p>
 
 <h2>
-<a name="user-content-contributors" class="anchor" href="#contributors"><span class="octicon octicon-link"></span></a>Contributors</h2>
+<a name="contributors" class="anchor" href="#contributors"><span class="octicon octicon-link"></span></a>Contributors</h2>
 
 <p><a href="http://twitter.com/homakov">@homakov</a>, <a href="http://twitter.com/isciurus">@isciurus</a> and <a href="http://github.com">you?</a></p></article>
 

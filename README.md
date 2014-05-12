@@ -12,7 +12,7 @@ Because of OAuth a while ago Soundcloud, Foursquare, Airbnb, About.me, Bit.ly, P
 
 ### Client account hijacking by connecting attacker's Provider account.
 
-[as known as The Most Common OAuth2 Vulnerability](http://homakov.blogspot.com/2012/07/saferweb-most-common-oauth2.html)
+[Also known as The Most Common OAuth2 Vulnerability](http://homakov.blogspot.com/2012/07/saferweb-most-common-oauth2.html)
 
 Provider returns `code` by redirecting user-agent to `SITE/oauth/callback?code=CODE`
 Now client must send `code` along with client credentials and `redirect_uri` to obtain `access_token`. 
@@ -32,7 +32,6 @@ It works for clients with social login and ability to add a login option to exis
 
 **State fixation bug**: It was possible to fixate `state` [in omniauth](https://github.com/mkdynamic/omniauth-facebook/wiki/CSRF-vulnerability:-CVE-2013-4562) because of [legacy code](https://github.com/mkdynamic/omniauth-facebook/blob/c277322722b6e8fba1eadf9de74927b73fbb86ea/lib/omniauth/strategies/facebook.rb#L105) which utilized user supplied `/connect?state=user_supplied` instead of generating a random one. 
 This is another OAuth design issue - sometimes developers want to use `state` for own purposes. You can try to send both values concatenated in one `state=welcome_landing.random_nonce`
-
 
 ### Client account hijacking abusing session fixation on provider
 This is a higher level of the first vulnerability. Even when client properly validates `state` it is possible to replace auth cookies on provider with attacker's account: CSRF on login (VK, Facebook), header injection, cookie forcing or tossing. 
@@ -68,12 +67,12 @@ It was a media hype [called "cover redirect"](http://homakov.blogspot.com/2014/0
 Leaked access_tokens can be used for spam and ruining your privacy. 
 Furthermore, leaked signed_request is even more sensitive data. By finding an open redirect on client you compromise Login with Facebook completely.
 
-**Remediation**: whitelist one redirect_uri in app's settings:
+**Remediation**: whitelist only one redirect_uri in app's settings:
 
 ![](http://4.bp.blogspot.com/-gUuXr1_G5HA/U2PsbZto1CI/AAAAAAAADr8/Vaj3sWfKBnM/s1600/Screen+Shot+2014-05-02+at+3.04.10+PM.png)
 
 ###Account hijacking by using access_token issued for attacker's client. 
-[as known as One Token to Rule Them All](http://homakov.blogspot.com/2012/08/oauth2-one-accesstoken-to-rule-them-all.html).
+[Also known as One Token to Rule Them All](http://homakov.blogspot.com/2012/08/oauth2-one-accesstoken-to-rule-them-all.html).
 This bug is relevant to mobile and client-side apps, because they often use access_token directly supplied by user. 
 
 Imagine, user has many "authorization rings" and gives a ring to every new website where he wants to log in. A malicious website admin can use rings of its users to log in other websites the users use.
@@ -83,7 +82,7 @@ Imagine, user has many "authorization rings" and gives a ring to every new websi
 **Remediation**: Before accepting user supplied access_token check if it was issued for your client_id at `https://graph.facebook.com/app?fields=id&access_token=TOKEN`
 
 
-## Transport level and JS SDK bugs
+## Transport and JS SDK bugs
 (to be continued)
 
 ## Extra
@@ -95,9 +94,9 @@ Main difference between OAuth2 and 1 is the way you transfer parameters to provi
 This is not a severe vulnerability because it is based on phishing. [FYI Paypal express checkout has this bug](http://homakov.blogspot.com/2014/01/token-fixation-in-paypal.html)
 
 
-### Provider In The Middle bug.
-Many startups have facebook connect and at the same time they are providers too. Providers must redirect users to 3rd party client's websites, and those are "open redirects" you just cannot fix. It makes this chain possible: Facebook -> Middleware Provider -> Client's token leakage.
-To fix this problem Facebook adds #_=_ in the end of callback URLs. Your startup should "kill" fragment to prevent leaking.
+### Provider In The Middle.
+Many startups have Facebook Connect, and at the same time they are providers too. Being providers, they must redirect users to 3rd party websites, and those are "open redirects" you just cannot fix. It makes this chain possible: Facebook -> Middleware Provider -> Client's token leakage.
+To fix this problem Facebook adds #_=_ in the end of callback URLs. Your startup should "kill" fragment to prevent leaking. Redirect this way:
 `Location: YOUR_CLIENT/callback?code=code#`
 
 ### Tricks to bypass redirect_uri validation

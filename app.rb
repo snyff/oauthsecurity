@@ -15,7 +15,7 @@ disable :protection
 
 get '/' do
   # use index.haml for readme
-  File.open('dist/index.html')
+  File.open('dist/Sakurity.html')
   #markdown :a #, :layout => :index
 end
 

@@ -1,9 +1,12 @@
 GEM
   remote: http://rubygems.org/
   specs:
+    haml (4.0.5)
+      tilt
     rack (1.5.2)
     rack-protection (1.5.3)
       rack
+    rdiscount (2.1.7.1)
     sinatra (1.4.5)
       rack (~> 1.4)
       rack-protection (~> 1.4)
@@ -18,5 +21,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  haml
+  rdiscount
   sinatra
   slim

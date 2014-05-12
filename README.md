@@ -1,12 +1,12 @@
 # OAuth Security Cheatsheet
 
-This document aims to describe common OAuth/Single Sign On/OpenID-related vulnerabilities. Many cross-site interactions are vulnerable to different kinds of leakings and hijackings - we saw account hijacking on almost every popular startup with "social login" feature.
+This document aims to describe common OAuth/Single Sign On/OpenID-related vulnerabilities. Many cross-site interactions are vulnerable to different kinds of leakings and hijackings. 
 
 Both hackers and developers can benefit from reading it.
 
-OAuth is a critical functionality. It is responsible for access to sensitive user data, authentication and authorization. **Poorly implemented OAuth is a reliable way to take account over**. Unlike XSS, it is easy to exploit, but hard to mitigate for victims (NoScript won't help, JavaScript is not required).
+OAuth is a critical functionality. It is responsible for access to sensitive user data, authentication and authorization. **Poorly implemented OAuth is a reliable way to take over an account**. Unlike XSS, it is easy to exploit, but hard to mitigate for victims (NoScript won't help, JavaScript is not required).
 
-Because of OAuth a while ago Soundcloud, Foursquare, Airbnb, About.me, Bit.ly, Pinterest, Digg, Stumbleupon, Songkick and other startups had account hijacking vulnerability. And many websites are vulnerable right. **Our motivation is to make people aware of "Social login" risks, we encourage you to use OAuth very carefully.**
+Because of OAuth many startups including Soundcloud, Foursquare, Airbnb, About.me, Bit.ly, Pinterest, Digg, Stumbleupon, Songkick had account hijacking vulnerability. And a lot of websites are still vulnerable. **Our motivation is to make people aware of "Social login" risks, and we encourage you to use OAuth very carefully.**
 
 ## Authorization Code flow
 
@@ -31,23 +31,25 @@ It works for clients with social login and ability to add a login option to exis
 **Remediation**: Before sending user to provider generate a random nonce and save it in cookies or session. When user is back make sure `state` you received is equal one from cookies.
 
 **State fixation bug**: It was possible to fixate `state` [in omniauth](https://github.com/mkdynamic/omniauth-facebook/wiki/CSRF-vulnerability:-CVE-2013-4562) because of [legacy code](https://github.com/mkdynamic/omniauth-facebook/blob/c277322722b6e8fba1eadf9de74927b73fbb86ea/lib/omniauth/strategies/facebook.rb#L105) which utilized user supplied `/connect?state=user_supplied` instead of generating a random one. 
-This is another OAuth design issue - sometimes developers want to use `state` for own purposes. You can try to send both values concatenated in one `state=welcome_landing.random_nonce`
+
+This is another OAuth design issue - sometimes developers want to use `state` for own purposes. Although you can send both values concatenated `state=welcome_landing.random_nonce`, but no doubt it looks ugly.
 
 ### Client account hijacking abusing session fixation on provider
-This is a higher level of the first vulnerability. Even when client properly validates `state` it is possible to replace auth cookies on provider with attacker's account: CSRF on login (VK, Facebook), header injection, cookie forcing or tossing. 
+This is a higher level of the first vulnerability. Even when client properly validates `state` we are able to replace auth cookies on provider with attacker's account: using CSRF on login (VK, Facebook), header injection, cookie forcing or tossing. 
 
-Then just load GET request triggering connect (`/user/auth/facebook` in omniauth), Facebook will respond with attacker's user info (uid=attacker's uid) and it will eventually connect attacker's provider account to victim's client account.
+Then we just load a GET request triggering connect (`/user/auth/facebook` in omniauth), Facebook will respond with attacker's user info (uid=attacker's uid) and it will eventually connect attacker's provider account to victim's client account.
 
 
 **Remediation**: make sure that adding a new social connection requires a valid csrf_token, so it is not possible to trigger process with CSRF. Ideally, use POST instead of GET. 
+
 [Facebook refused to fix CSRF on login from their side.](http://homakov.blogspot.com/2014/01/two-severe-wontfix-vulnerabilities-in.html)
 This threat is client's business too, but many libraries remain vulnerable. **Do not expect providers to give you reliable authentication data**. 
 
 
 ### Account hijacking by leaking authorization code.
-OAuth documentation clearly says that providers must check first `redirect_uri` is equal `redirect_uri` client uses to obtain `access_token`. 
+OAuth documentation makes it clear that providers must check the first `redirect_uri` is equal `redirect_uri` client uses to obtain `access_token`. 
 We didn't really check this because it looked too hard to get it wrong.
-Surprisingly **many** providers got it wrong: Foursquare (reported), VK ([report, in Russian](http://habrahabr.ru/post/150756/#comment_5116061), Github ([could be used to leak tokens to private repos](http://homakov.blogspot.com/2014/02/how-i-hacked-github-again.html)), and many more "home made" Single Sign Ons.
+Surprisingly **many** providers got it wrong: Foursquare (reported), VK ([report, in Russian](http://habrahabr.ru/post/150756/#comment_5116061), Github ([could be used to leak tokens to private repos](http://homakov.blogspot.com/2014/02/how-i-hacked-github-again.html)), and a lot of "home made" Single Sign Ons.
 
 The attack is straightforward: find a leaking page on client's domain, insert cross domain image or a link to your website, then use this page as `redirect_uri`.
 When your victim will load crafted URL it will send him to `leaking_page?code=CODE` and victim's user-agent will expose the code in the Referrer header.
@@ -87,16 +89,21 @@ Imagine, user has many "authorization rings" and gives a ring to every new websi
 
 ## Extra
 ### Leaked client credentials threat
-Client credetials are not as important as it sounds. All you can do is using leaking pages to leak auth code, then manually getting an access_token for them (providing leaking redirect_uri instead of actual). Even this threat can be mitigated when provider uses static redirect_uri. 
+Client credetials are not as important as it sounds. All you can do is using leaking pages to leak auth code, then manually getting an access_token for them (providing leaking redirect_uri instead of actual). Even this threat can be mitigated when providers use static redirect_uri. 
 
 ### Session fixation (OAuth1.0)
-Main difference between OAuth2 and 1 is the way you transfer parameters to providers. In first version you send all parameters to provider and obtain according request_token. Then you navigate user to provider?request_token=TOKEN and after authorizing user is back to `client/callback?request_token=TOKEN`. The idea of fixation here is we can trick user into accepting Token1 which was issued for you, then re-use Token1 on client's callback.
-This is not a severe vulnerability because it is based on phishing. [FYI Paypal express checkout has this bug](http://homakov.blogspot.com/2014/01/token-fixation-in-paypal.html)
+Main difference between OAuth2 and 1 is the way you transfer parameters to providers. In the first version you send all parameters to provider and obtain according request_token. Then you navigate user to provider?request_token=TOKEN and after authorization user is redirected back to `client/callback?request_token=SAME_TOKEN`. 
+
+The idea of fixation here is we can trick user into accepting Token1 supplied by us which was issued for us, then re-use Token1 on client's callback.
+
+This is not a severe vulnerability because it is mostly based on phishing. [FYI Paypal express checkout has this bug](http://homakov.blogspot.com/2014/01/token-fixation-in-paypal.html)
 
 
 ### Provider In The Middle.
 Many startups have Facebook Connect, and at the same time they are providers too. Being providers, they must redirect users to 3rd party websites, and those are "open redirects" you just cannot fix. It makes this chain possible: Facebook -> Middleware Provider -> Client's token leakage.
+
 To fix this problem Facebook adds #_=_ in the end of callback URLs. Your startup should "kill" fragment to prevent leaking. Redirect this way:
+
 `Location: YOUR_CLIENT/callback?code=code#`
 
 ### Tricks to bypass redirect_uri validation

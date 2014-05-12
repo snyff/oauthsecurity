@@ -46,7 +46,6 @@
 
 
 
-
 <article class="markdown-body entry-content" itemprop="mainContentOfPage"><h1>
 <a name="oauth-security-cheatsheet" class="anchor" href="#oauth-security-cheatsheet"><span class="octicon octicon-link"></span></a>OAuth Security Cheatsheet</h1>
 
@@ -64,7 +63,7 @@
 <h3>
 <a name="client-account-hijacking-by-connecting-attackers-provider-account" class="anchor" href="#client-account-hijacking-by-connecting-attackers-provider-account"><span class="octicon octicon-link"></span></a>Client account hijacking by connecting attacker's Provider account.</h3>
 
-<p><a href="http://homakov.blogspot.com/2012/07/saferweb-most-common-oauth2.html">as known as The Most Common OAuth2 Vulnerability</a></p>
+<p><a href="http://homakov.blogspot.com/2012/07/saferweb-most-common-oauth2.html">Also known as The Most Common OAuth2 Vulnerability</a></p>
 
 <p>Provider returns <code>code</code> by redirecting user-agent to <code>SITE/oauth/callback?code=CODE</code>
 Now client must send <code>code</code> along with client credentials and <code>redirect_uri</code> to obtain <code>access_token</code>. </p>
@@ -122,14 +121,14 @@ When your victim will load crafted URL it will send him to <code>leaking_page?co
 <p>Leaked access_tokens can be used for spam and ruining your privacy. 
 Furthermore, leaked signed_request is even more sensitive data. By finding an open redirect on client you compromise Login with Facebook completely.</p>
 
-<p><strong>Remediation</strong>: whitelist one redirect_uri in app's settings:</p>
+<p><strong>Remediation</strong>: whitelist only one redirect_uri in app's settings:</p>
 
 <p><a href="https://camo.githubusercontent.com/331570d7cba38f8081b72b5e1c1128449a0d3de4/687474703a2f2f342e62702e626c6f6773706f742e636f6d2f2d6755755872315f473548412f55325073625a746f3143492f41414141414141414472382f56616a337357664b426e4d2f73313630302f53637265656e2b53686f742b323031342d30352d30322b61742b332e30342e31302b504d2e706e67" target="_blank"><img src="https://camo.githubusercontent.com/331570d7cba38f8081b72b5e1c1128449a0d3de4/687474703a2f2f342e62702e626c6f6773706f742e636f6d2f2d6755755872315f473548412f55325073625a746f3143492f41414141414141414472382f56616a337357664b426e4d2f73313630302f53637265656e2b53686f742b323031342d30352d30322b61742b332e30342e31302b504d2e706e67" alt="" data-canonical-src="http://4.bp.blogspot.com/-gUuXr1_G5HA/U2PsbZto1CI/AAAAAAAADr8/Vaj3sWfKBnM/s1600/Screen+Shot+2014-05-02+at+3.04.10+PM.png" style="max-width:100%;"></a></p>
 
 <h3>
 <a name="account-hijacking-by-using-access_token-issued-for-attackers-client" class="anchor" href="#account-hijacking-by-using-access_token-issued-for-attackers-client"><span class="octicon octicon-link"></span></a>Account hijacking by using access_token issued for attacker's client.</h3>
 
-<p><a href="http://homakov.blogspot.com/2012/08/oauth2-one-accesstoken-to-rule-them-all.html">as known as One Token to Rule Them All</a>.
+<p><a href="http://homakov.blogspot.com/2012/08/oauth2-one-accesstoken-to-rule-them-all.html">Also known as One Token to Rule Them All</a>.
 This bug is relevant to mobile and client-side apps, because they often use access_token directly supplied by user. </p>
 
 <p>Imagine, user has many "authorization rings" and gives a ring to every new website where he wants to log in. A malicious website admin can use rings of its users to log in other websites the users use.</p>
@@ -139,10 +138,9 @@ This bug is relevant to mobile and client-side apps, because they often use acce
 <p><strong>Remediation</strong>: Before accepting user supplied access_token check if it was issued for your client_id at <code>https://graph.facebook.com/app?fields=id&amp;access_token=TOKEN</code></p>
 
 <h2>
-<a name="transport-level-and-js-sdk-bugs" class="anchor" href="#transport-level-and-js-sdk-bugs"><span class="octicon octicon-link"></span></a>Transport level and JS SDK bugs</h2>
+<a name="transport-and-js-sdk-bugs" class="anchor" href="#transport-and-js-sdk-bugs"><span class="octicon octicon-link"></span></a>Transport and JS SDK bugs</h2>
 
-<h3>
-<a name="xss-with-rpc" class="anchor" href="#xss-with-rpc"><span class="octicon octicon-link"></span></a>XSS with RPC</h3>
+<p>(to be continued)</p>
 
 <h2>
 <a name="extra" class="anchor" href="#extra"><span class="octicon octicon-link"></span></a>Extra</h2>
@@ -159,10 +157,10 @@ This bug is relevant to mobile and client-side apps, because they often use acce
 This is not a severe vulnerability because it is based on phishing. <a href="http://homakov.blogspot.com/2014/01/token-fixation-in-paypal.html">FYI Paypal express checkout has this bug</a></p>
 
 <h3>
-<a name="provider-in-the-middle-bug" class="anchor" href="#provider-in-the-middle-bug"><span class="octicon octicon-link"></span></a>Provider In The Middle bug.</h3>
+<a name="provider-in-the-middle" class="anchor" href="#provider-in-the-middle"><span class="octicon octicon-link"></span></a>Provider In The Middle.</h3>
 
-<p>Many startups have facebook connect and at the same time they are providers too. Providers must redirect users to 3rd party client's websites, and those are "open redirects" you just cannot fix. It makes this chain possible: Facebook -&gt; Middleware Provider -&gt; Client's token leakage.
-To fix this problem Facebook adds #<em>=</em> in the end of callback URLs. Your startup should "kill" fragment to prevent leaking.
+<p>Many startups have Facebook Connect, and at the same time they are providers too. Being providers, they must redirect users to 3rd party websites, and those are "open redirects" you just cannot fix. It makes this chain possible: Facebook -&gt; Middleware Provider -&gt; Client's token leakage.
+To fix this problem Facebook adds #<em>=</em> in the end of callback URLs. Your startup should "kill" fragment to prevent leaking. Redirect this way:
 <code>Location: YOUR_CLIENT/callback?code=code#</code></p>
 
 <h3>
@@ -184,7 +182,7 @@ To fix this problem Facebook adds #<em>=</em> in the end of callback URLs. Your 
 <h2>
 <a name="contributors" class="anchor" href="#contributors"><span class="octicon octicon-link"></span></a>Contributors</h2>
 
-<p><a href="http://twitter.com/homakov">@homakov</a>, <a href="http://twitter.com/isciurus">@isciurus</a> and <a href="http://github.com">you?</a></p></article>
+<p><a href="http://twitter.com/homakov">@homakov</a> and <a href="http://github.com/homakov/oauthsecurity">you?</a></p></article>
 
 
 
